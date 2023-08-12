@@ -9,9 +9,13 @@ import com.example.newsapp.domain.repository.NewsRepository
 import javax.inject.Inject
 
 class NewsRepositoryImp @Inject constructor(private val endpoints: Endpoints) : NewsRepository {
-    override suspend fun fetchNews(query: String, sortBy: Sort): ResponseWrapper<GetAllNewsResponse> {
-       return apiCallHandler {
-           endpoints.getNewsList(query, sortBy.by)
-       }
+    override suspend fun fetchNews(
+        query: String, sortBy: Sort,
+        pageNumber: Int,
+        pageSize: Int
+    ): ResponseWrapper<GetAllNewsResponse> {
+        return apiCallHandler {
+            endpoints.getNewsList(query, sortBy.by,pageNumber,pageSize)
+        }
     }
 }

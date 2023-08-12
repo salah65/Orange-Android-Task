@@ -7,6 +7,9 @@ import retrofit2.http.Query
 interface Endpoints {
     @GET("everything")
     suspend fun getNewsList(
-        @Query("q") query: String, @Query("sortBy") sortBy: String
+        @Query("q") query: String,
+        @Query("sortBy") sortBy: String,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int
     ): GetAllNewsResponse
 }

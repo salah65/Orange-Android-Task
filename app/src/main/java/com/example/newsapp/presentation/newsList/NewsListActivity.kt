@@ -7,14 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.LoadState
 import com.example.newsapp.databinding.ActivityNewsListBinding
 import com.example.newsapp.presentation.core.getQueryTextChangeStateFlow
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -38,13 +36,10 @@ class NewsListActivity : AppCompatActivity() {
     private fun initViews() {
         binding.rvNewsList.adapter = adapter
         lifecycleScope.launch {
-            binding.searchBar.getQueryTextChangeStateFlow()
-                .debounce(1000)
-                .filter { it.isNotEmpty() }
-                .distinctUntilChanged()
-                .flowOn(Dispatchers.Default)
+            binding.searchBar.getQueryTextChangeStateFlow().debounce(1000)
+                .filter { it.isNotEmpty() }.distinctUntilChanged().flowOn(Dispatchers.Default)
                 .collect { query ->
-                    viewModel.getNews(query)
+                    viewModel.setSearchQuery(query)
                 }
         }
     }
@@ -52,15 +47,26 @@ class NewsListActivity : AppCompatActivity() {
     private fun initObservers() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.getNewsFlow.collect {
-                    adapter.updateData(it)
+                viewModel.getNewsFlow.collectLatest {
+                    adapter.submitData(it)
                 }
             }
         }
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.showErrorFlow.collect {
-                    Toast.makeText(this@NewsListActivity, it, Toast.LENGTH_SHORT).show()
+            adapter.loadStateFlow.collectLatest { loadStates ->
+                val refreshState = loadStates.refresh
+                val appendState = loadStates.append
+
+                if (refreshState is LoadState.Error || appendState is LoadState.Error) {
+                    val errorMessage = (refreshState as? LoadState.Error)?.error?.localizedMessage
+                        ?: (appendState as? LoadState.Error)?.error?.localizedMessage
+                        ?: "An error occurred"
+
+                    Toast.makeText(
+                        this@NewsListActivity,
+                        errorMessage,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

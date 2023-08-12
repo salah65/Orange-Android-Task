@@ -2,20 +2,25 @@ package com.example.newsapp.presentation.newsList
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsapp.databinding.ItemNewsListRvBinding
 import com.example.newsapp.domain.model.Article
 
 class NewListAdapter(
-    private var newsList: List<Article> = emptyList(),
     val onArticleClickListener: (article: Article) -> Unit
-) :
-    RecyclerView.Adapter<ViewHolder>() {
+) : PagingDataAdapter<Article, ViewHolder>(ITEM_COMPARATOR) {
+    companion object {
+        private val ITEM_COMPARATOR = object : DiffUtil.ItemCallback<Article>() {
+            override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
+                return oldItem.headLine == newItem.headLine
+            }
 
-
-    fun updateData(newData: List<Article>) {
-        this.newsList = newData
-        notifyDataSetChanged()
+            override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -24,14 +29,13 @@ class NewListAdapter(
         return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return newsList.size
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val article = newsList[position]
-        holder.bind(article)
-        holder.itemView.setOnClickListener { onArticleClickListener(article) }
+        val article = getItem(position)
+        article?.let {
+            holder.bind(article)
+            holder.itemView.setOnClickListener { onArticleClickListener(article) }
+        }
     }
 }
 
