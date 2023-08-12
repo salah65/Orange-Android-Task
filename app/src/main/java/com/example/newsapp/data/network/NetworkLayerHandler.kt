@@ -1,17 +1,32 @@
 package com.example.newsapp.data.network
 
+import com.example.newsapp.data.network.response.BaseResponse
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 
-suspend fun <T> apiCallHandler(
+suspend fun <T : BaseResponse> apiCallHandler(
     dispatcher: CoroutineDispatcher = Dispatchers.IO, apiCall: suspend () -> T
 ): ResponseWrapper<T> {
     return withContext(dispatcher) {
         try {
-            ResponseWrapper.Success(apiCall.invoke())
+            val response = apiCall.invoke()
+            if (response.status == "success") {
+                ResponseWrapper.Success(response)
+            } else {
+                ResponseWrapper.Error(message = response.message)
+            }
         } catch (throwable: Throwable) {
-            ResponseWrapper.Error(message = throwable.localizedMessage)
+            val errorString = (throwable as? HttpException)?.response()?.errorBody()?.string()
+             try {
+                val baseErrorDTO = Gson().fromJson(errorString, BaseResponse::class.java)
+                ResponseWrapper.Error(message = baseErrorDTO.message!!)
+            } catch (e: Exception) {
+                ResponseWrapper.Error(message = "There is an error happen, please try again later")
+            }
+
         }
     }
 }

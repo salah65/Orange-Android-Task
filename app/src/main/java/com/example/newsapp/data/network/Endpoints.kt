@@ -9,6 +9,7 @@ interface Endpoints {
     suspend fun getNewsList(
         @Query("q") query: String,
         @Query("sortBy") sortBy: String,
+        @Query("searchIn") searchIn: String,
         @Query("page") page: Int,
         @Query("pageSize") pageSize: Int
     ): GetAllNewsResponse

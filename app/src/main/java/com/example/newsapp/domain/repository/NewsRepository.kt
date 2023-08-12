@@ -2,11 +2,14 @@ package com.example.newsapp.domain.repository
 
 import com.example.newsapp.data.network.ResponseWrapper
 import com.example.newsapp.data.network.response.GetAllNewsResponse
-import com.example.newsapp.domain.core.Sort
+import com.example.newsapp.domain.core.SearchIn
+import com.example.newsapp.domain.core.SortBy
 
 interface NewsRepository {
     suspend fun fetchNews(
-        query: String, sortBy: Sort,
+        query: String,
+        sortBy: String,
+        searchIn: String,
         pageNumber: Int,
         pageSize: Int
     ): ResponseWrapper<GetAllNewsResponse>

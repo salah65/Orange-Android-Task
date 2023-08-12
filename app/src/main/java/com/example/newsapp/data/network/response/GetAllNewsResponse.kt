@@ -9,10 +9,7 @@ data class GetAllNewsResponse(
 
     @field:SerializedName("articles")
     val articles: List<ArticlesItem?>? = null,
-
-    @field:SerializedName("status")
-    val status: String? = null
-)
+) : BaseResponse(null, null, null)
 
 data class Source(
 
