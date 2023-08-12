@@ -6,13 +6,14 @@ import com.example.newsapp.domain.model.Article
 fun List<ArticlesItem?>?.mapToListOfNews(): List<Article> {
     return this?.map {
         Article(
-            it!!.urlToImage?:"",
-            it.description?:"",
-            it.content?:"",
-            it.source?.name?:"",
-            it.description?:"",
-            it.author?:"",
-            it.publishedAt?:""
+            it!!.urlToImage ?: "",
+            it.description ?: "",
+            it.content ?: "",
+            it.source?.name ?: "",
+            it.description ?: "",
+            it.author ?: "",
+            it.publishedAt ?: "",
+            it.url ?: ""
         )
     } ?: emptyList()
 }

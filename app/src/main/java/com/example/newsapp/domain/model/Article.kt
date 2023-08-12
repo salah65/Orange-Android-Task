@@ -7,5 +7,6 @@ data class Article(
     val sourceName: String,
     val description: String,
     val author: String,
-    val date: String
-)
+    val date: String,
+    val articleURL:String
+):java.io.Serializable

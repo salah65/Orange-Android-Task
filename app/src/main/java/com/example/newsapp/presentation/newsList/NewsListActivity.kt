@@ -1,8 +1,11 @@
 package com.example.newsapp.presentation.newsList
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -10,18 +13,22 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
 import com.example.newsapp.databinding.ActivityNewsListBinding
 import com.example.newsapp.presentation.core.getQueryTextChangeStateFlow
+import com.example.newsapp.presentation.newsDetails.ArticleDetails
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @AndroidEntryPoint
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: ActivityNewsListBinding
     private val viewModel: NewsListViewModel by viewModels()
     private val adapter: NewListAdapter by lazy {
         NewListAdapter {
-
+            val intent = Intent(this, ArticleDetails::class.java)
+            intent.putExtra(ArticleDetails.ArticleDetails.ARTICLE_KEY, it)
+            startActivity(intent)
         }
     }
 
