@@ -13,7 +13,7 @@ suspend fun <T : BaseResponse> apiCallHandler(
     return withContext(dispatcher) {
         try {
             val response = apiCall.invoke()
-            if (response.status == "success") {
+            if (response.status == "ok") {
                 ResponseWrapper.Success(response)
             } else {
                 ResponseWrapper.Error(message = response.message)

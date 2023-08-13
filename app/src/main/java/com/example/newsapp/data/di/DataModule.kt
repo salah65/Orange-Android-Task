@@ -1,5 +1,6 @@
 package com.example.newsapp.data.di
 
+import com.example.newsapp.data.localDb.dao.ArticlesDao
 import com.example.newsapp.data.network.Endpoints
 import com.example.newsapp.data.repositoryImplementation.NewsRepositoryImp
 import com.example.newsapp.domain.repository.NewsRepository
@@ -15,8 +16,8 @@ import javax.inject.Singleton
 object DataModule {
     @Singleton
     @Provides
-    fun provideNewsRepository(endpoints: Endpoints): NewsRepository {
-        return NewsRepositoryImp(endpoints)
+    fun provideNewsRepository(endpoints: Endpoints, dao: ArticlesDao): NewsRepository {
+        return NewsRepositoryImp(endpoints, dao)
     }
 
     @Singleton

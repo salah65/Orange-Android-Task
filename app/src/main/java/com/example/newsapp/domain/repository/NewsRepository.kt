@@ -1,9 +1,9 @@
 package com.example.newsapp.domain.repository
 
+import com.example.newsapp.data.localDb.entities.ArticleEntity
 import com.example.newsapp.data.network.ResponseWrapper
 import com.example.newsapp.data.network.response.GetAllNewsResponse
-import com.example.newsapp.domain.core.SearchIn
-import com.example.newsapp.domain.core.SortBy
+import kotlinx.coroutines.flow.Flow
 
 interface NewsRepository {
     suspend fun fetchNews(
@@ -13,4 +13,8 @@ interface NewsRepository {
         pageNumber: Int,
         pageSize: Int
     ): ResponseWrapper<GetAllNewsResponse>
+
+    suspend fun cacheNews(news: List<ArticleEntity>)
+
+    suspend fun getNews(query: String): List<ArticleEntity>
 }
