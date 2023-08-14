@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.BindingAdapter
 import coil.load
+import com.example.newsapp.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
@@ -13,7 +14,11 @@ import java.util.*
 
 @BindingAdapter("android:url")
 fun loadImageByUrl(imageView: ImageView, url: String) {
-    imageView.load(url)
+    imageView.load(url){
+        placeholder(R.drawable.image_place_holder)
+        error(R.drawable.image_place_holder)
+
+    }
 }
 
 fun EditText.getQueryTextChangeStateFlow(): StateFlow<String> {

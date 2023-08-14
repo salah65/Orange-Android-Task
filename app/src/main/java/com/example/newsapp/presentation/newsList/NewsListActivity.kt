@@ -3,7 +3,7 @@ package com.example.newsapp.presentation.newsList
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
+import android.view.View
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +14,7 @@ import androidx.paging.LoadState
 import com.example.newsapp.databinding.ActivityNewsListBinding
 import com.example.newsapp.presentation.core.getQueryTextChangeStateFlow
 import com.example.newsapp.presentation.newsDetails.ArticleDetails
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -43,17 +44,19 @@ class NewsListActivity : AppCompatActivity() {
     private fun initViews() {
         binding.rvNewsList.adapter = adapter
         lifecycleScope.launch {
-            binding.searchBar.getQueryTextChangeStateFlow().debounce(1000)
-                .filter { it.isNotEmpty() }.distinctUntilChanged().flowOn(Dispatchers.Default)
+            binding.searchBar.getQueryTextChangeStateFlow()
+                .debounce(1000)
+                .distinctUntilChanged()
+                .flowOn(Dispatchers.Default)
                 .collect { query ->
-                    viewModel.setSearchQuery(query)
+                    viewModel.setSearchQuery(query.ifEmpty { "tesla" })
                 }
         }
     }
 
     private fun initObservers() {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.getNewsFlow.collectLatest {
                     adapter.submitData(it)
                 }
@@ -63,18 +66,21 @@ class NewsListActivity : AppCompatActivity() {
             adapter.loadStateFlow.collectLatest { loadStates ->
                 val refreshState = loadStates.refresh
                 val appendState = loadStates.append
-
-                if (refreshState is LoadState.Error || appendState is LoadState.Error) {
+                if (refreshState is LoadState.Loading) binding.loader.visibility =
+                    View.VISIBLE
+                else if (refreshState is LoadState.Error || appendState is LoadState.Error) {
+                    binding.loader.visibility = View.GONE
                     val errorMessage = (refreshState as? LoadState.Error)?.error?.localizedMessage
                         ?: (appendState as? LoadState.Error)?.error?.localizedMessage
                         ?: "An error occurred"
 
-                    Toast.makeText(
-                        this@NewsListActivity,
-                        errorMessage,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                    Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE)
+                        .setAction("Try Again") {
+                            initObservers()
+                        }.show()
+                } else binding.loader.visibility = View.GONE
+
+
             }
         }
     }
